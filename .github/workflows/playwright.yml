@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master]
 
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -62,17 +66,26 @@ jobs:
           CI: true
           BROWSERS: ${{ matrix.browser }}
 
+      - name: Publish JUnit test results to GitHub
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: ${{ always() && !cancelled() && hashFiles('test-results/junit.xml') != '' }}
+        with:
+          files: test-results/junit.xml
+          check_name: Playwright E2E (${{ matrix.browser }})
+          comment_mode: off
+          action_fail: false
+
       - name: Upload HTML report
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: ${{ always() && !cancelled() }}
         with:
           name: playwright-report-${{ matrix.browser }}
           path: playwright-report/
           retention-days: 7
 
-      - name: Upload JUnit report
+      - name: Upload JUnit report (XML)
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: ${{ always() && !cancelled() }}
         with:
           name: junit-${{ matrix.browser }}
           path: test-results/junit.xml
@@ -81,7 +94,7 @@ jobs:
 
       - name: Upload traces on failure
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: ${{ failure() && !cancelled() }}
         with:
           name: playwright-traces-${{ matrix.browser }}
           path: test-results/
