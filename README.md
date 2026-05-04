@@ -111,5 +111,4 @@ GitHub Actions runs two jobs on every push and PR ([`.github/workflows/playwrigh
 1. **lint** — ESLint, Prettier check, tsc
 2. **test** — matrix **Chromium, Firefox, and WebKit** (`fail-fast: false`), installs browsers with cache keying, runs `globalSetup`, uploads HTML report + `junit.xml` per browser (retained 7 days). Traces upload only when tests fail.
 
-
 `.gitignore` already covers `node_modules/`, `test-results/`, and `playwright-report/`.
